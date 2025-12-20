@@ -24,7 +24,7 @@ jobs:
         working-directory: example
 
       - name: Build web (example)
-        run: flutter build web --release
+        run: flutter build web --release --base-href "/selection_marquee/"
         working-directory: example
 
       - name: Deploy to GitHub Pages

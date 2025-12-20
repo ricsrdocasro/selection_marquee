@@ -1,3 +1,5 @@
+[![Pub Version](https://img.shields.io/pub/v/selection_marquee)](https://pub.dev/packages/selection_marquee)
+
 # Selection Marquee
 
 A highly customizable Flutter package that provides a drag-to-select marquee (selection rectangle) with support for auto-scrolling, custom styling (solid, dashed, dotted, marching ants), and easy integration with any scrollable or grid view.

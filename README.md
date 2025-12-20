@@ -2,6 +2,10 @@
 
 A highly customizable Flutter package that provides a drag-to-select marquee (selection rectangle) with support for auto-scrolling, custom styling (solid, dashed, dotted, marching ants), and easy integration with any scrollable or grid view.
 
+## Live Demo
+
+Check out the live example app here: [https://ricsrdocasro.github.io/selection_marquee/](https://ricsrdocasro.github.io/selection_marquee/)
+
 ![Selection Marquee Demo](example/assets/selection.gif)
 
 ## Features

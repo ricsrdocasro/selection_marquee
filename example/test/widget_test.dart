@@ -1,0 +1,25 @@
+// This is a basic Flutter widget test.
+//
+// To perform an interaction with a widget in your test, use the WidgetTester
+// utility in the flutter_test package. For example, you can send tap and scroll
+// gestures. You can also use WidgetTester to find child widgets in the widget
+// tree, read text, and verify that the values of widget properties are correct.
+import 'package:flutter_test/flutter_test.dart';
+
+import 'package:example/main.dart';
+
+void main() {
+  testWidgets('Example app loads', (WidgetTester tester) async {
+    await tester.pumpWidget(const ExampleApp());
+    await tester.pumpAndSettle();
+
+    expect(find.text('Selection Marquee Example'), findsOneWidget);
+    // Ensure the tip text is present (items may be off-screen depending on layout)
+    expect(
+      find.text(
+        'Tip: drag with mouse or long-press and drag on touch devices. Tap items to toggle selection.',
+      ),
+      findsOneWidget,
+    );
+  });
+}

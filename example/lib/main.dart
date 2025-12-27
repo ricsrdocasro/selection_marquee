@@ -328,7 +328,7 @@ class _ExampleHomeState extends State<ExampleHome> {
                                       setState(() => _minAutoScrollFactor = v),
                                 ),
                                 const SizedBox(height: 8),
-                                Text('Auto-scroll curve:'),
+                                const Text('Auto-scroll curve:'),
                                 Row(
                                   children: [
                                     Expanded(
@@ -358,7 +358,7 @@ class _ExampleHomeState extends State<ExampleHome> {
                                   ],
                                 ),
                                 const SizedBox(height: 8),
-                                Text('Selection border style:'),
+                                const Text('Selection border style:'),
                                 Row(
                                   children: [
                                     Expanded(
@@ -463,72 +463,76 @@ class _ExampleHomeState extends State<ExampleHome> {
                                 childCount: items.length,
                               ),
                             ),
-                      SliverToBoxAdapter(child: SizedBox(height: 80)),
-                    ],
-                  ),
-                ),
-              ),
-            ),
-          ),
-
-          // sidebar
-          AnimatedContainer(
-            duration: const Duration(milliseconds: 200),
-            width: _sidebarOpen ? 240 : 0,
-            child: _sidebarOpen
-                ? Container(
-                    color: Theme.of(
-                      context,
-                    ).colorScheme.surfaceContainerHighest,
-                    child: Padding(
-                      padding: const EdgeInsets.all(12.0),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                            children: [
-                              const Text('Auto-scroll'),
-                              IconButton(
-                                icon: const Icon(Icons.close),
-                                onPressed: () =>
-                                    setState(() => _sidebarOpen = false),
-                              ),
-                            ],
-                          ),
-                          const SizedBox(height: 8),
-                          Text(
-                            'Velocity: ${_currentVelocity.toStringAsFixed(1)} px/s',
-                          ),
-                          const SizedBox(height: 8),
-                          LinearProgressIndicator(
-                            value: (_currentVelocity.abs() /
-                                    (_autoScrollSpeed == 0
-                                        ? 1
-                                        : _autoScrollSpeed))
-                                .clamp(0.0, 1.0),
-                          ),
-                          const SizedBox(height: 12),
-                          Text(
-                            'Direction: ${_currentVelocity < 0 ? 'Up' : _currentVelocity > 0 ? 'Down' : 'None'}',
-                          ),
-                          const SizedBox(height: 12),
-                          Text(
-                            'Edge zone: ${_edgeZoneFraction.toStringAsFixed(2)}',
-                          ),
-                          Text(
-                            'Max speed: ${_autoScrollSpeed.toStringAsFixed(0)}',
-                          ),
-                          Text(
-                            'Min factor: ${_minAutoScrollFactor.toStringAsFixed(2)}',
-                          ),
-                        ],
-                      ),
-                    ),
-                  )
-                : null,
-          ),
-        ],
+                                                                  const SliverToBoxAdapter(child: SizedBox(height: 80)),
+                                                                ],
+                                                              ),
+                                                            ),
+                                                          ),
+                                                        ),
+                                                      ),
+                                            
+                                                      // sidebar
+                                                      AnimatedContainer(
+                                                        duration: const Duration(milliseconds: 200),
+                                                        width: _sidebarOpen ? 240 : 0,
+                                                        child: _sidebarOpen
+                                                            ? Container(
+                                                                color: Theme.of(
+                                                                  context,
+                                                                ).colorScheme.surfaceContainerHighest,
+                                                                child: Padding(
+                                                                  padding: const EdgeInsets.all(12.0),
+                                                                  child: Column(
+                                                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                                                    children: [
+                                                                      Row(
+                                                                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                                                        children: [
+                                                                          const Text('Auto-scroll'),
+                                                                          IconButton(
+                                                                            icon: const Icon(Icons.close),
+                                                                            onPressed: () =>
+                                                                                setState(() => _sidebarOpen = false),
+                                                                          ),
+                                                                        ],
+                                                                      ),
+                                                                      const SizedBox(height: 8),
+                                                                      Text(
+                                                                        'Velocity: ${_currentVelocity.toStringAsFixed(1)} px/s',
+                                                                      ),
+                                                                      const SizedBox(height: 8),
+                                                                      LinearProgressIndicator(
+                                                                        value:
+                                                                            (_currentVelocity.abs() /
+                                                                                    (_autoScrollSpeed == 0
+                                                                                        ? 1
+                                                                                        : _autoScrollSpeed))
+                                                                                .clamp(0.0, 1.0),
+                                                                      ),
+                                                                      const SizedBox(height: 12),
+                                                                      Text(
+                                                                        'Direction: ${_currentVelocity < 0
+                                                                            ? 'Up'
+                                                                            : _currentVelocity > 0
+                                                                            ? 'Down'
+                                                                            : 'None'}',
+                                                                      ),
+                                                                      const SizedBox(height: 12),
+                                                                      Text(
+                                                                        'Edge zone: ${_edgeZoneFraction.toStringAsFixed(2)}',
+                                                                      ),
+                                                                      Text(
+                                                                        'Max speed: ${_autoScrollSpeed.toStringAsFixed(0)}',
+                                                                      ),
+                                                                      Text(
+                                                                        'Min factor: ${_minAutoScrollFactor.toStringAsFixed(2)}',
+                                                                      ),
+                                                                    ],
+                                                                  ),
+                                                                ),
+                                                              )
+                                                            : null,
+                                                      ),        ],
       ),
       bottomNavigationBar: BottomAppBar(
         child: Padding(

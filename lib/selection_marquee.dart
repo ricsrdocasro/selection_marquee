@@ -307,8 +307,9 @@ class SelectionController extends ChangeNotifier {
     // Sort: Top-to-bottom, then Left-to-right
     items.sort((a, b) {
       final dy = a.rect.top - b.rect.top;
-      if (dy.abs() > 0.5)
+      if (dy.abs() > 0.5) {
         return dy.sign.toInt(); // Tolerance for grid alignment
+      }
       return (a.rect.left - b.rect.left).sign.toInt();
     });
 
@@ -582,8 +583,6 @@ class _SelectionMarqueeState extends State<SelectionMarquee>
 
           // KEYBOARD MODIFIERS
           bool shouldClear = true;
-          Set<String>? initialSelection;
-          SelectionDragType dragType = SelectionDragType.replace;
 
           if (widget.enableKeyboardDrag) {
             final keys = HardwareKeyboard.instance.logicalKeysPressed;
@@ -599,14 +598,8 @@ class _SelectionMarqueeState extends State<SelectionMarquee>
             // Ctrl + Drag = Invert (Toggle) what is under the marquee
             // Shift + Drag = Additive (Accumulate) - standard desktop behavior for marquee
 
-            if (isCtrl) {
+            if (isCtrl || isShift) {
               shouldClear = false;
-              initialSelection = widget.controller.selectedIds;
-              dragType = SelectionDragType.invert;
-            } else if (isShift) {
-              shouldClear = false;
-              initialSelection = widget.controller.selectedIds;
-              dragType = SelectionDragType.additive;
             }
           }
 

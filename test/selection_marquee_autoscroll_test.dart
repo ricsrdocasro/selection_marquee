@@ -10,7 +10,7 @@ void main() {
     final controller = SelectionController();
     final marqueeKey = GlobalKey();
     final scrollController = ScrollController();
-    final marqueeBoxKey = const Key('marqueeBox');
+    const marqueeBoxKey = Key('marqueeBox');
 
     await tester.pumpWidget(
       MaterialApp(
@@ -81,7 +81,7 @@ void main() {
     final controller = SelectionController();
     final marqueeKey = GlobalKey();
     final scrollController = ScrollController();
-    final marqueeBoxKey = const Key('marqueeBox2');
+    const marqueeBoxKey = Key('marqueeBox2');
 
     await tester.pumpWidget(
       MaterialApp(

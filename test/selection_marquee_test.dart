@@ -12,7 +12,7 @@ void main() {
     });
 
     test('starts selection correctly', () {
-      final startPosition = Offset(10, 10);
+      const startPosition = Offset(10, 10);
       controller.startSelection(startPosition);
 
       expect(controller.isSelecting, isTrue);
@@ -24,8 +24,8 @@ void main() {
     });
 
     test('updates selection correctly', () {
-      final startPosition = Offset(10, 10);
-      final currentPosition = Offset(50, 50);
+      const startPosition = Offset(10, 10);
+      const currentPosition = Offset(50, 50);
       controller.startSelection(startPosition);
       controller.updateSelection(currentPosition, startPosition);
 
@@ -36,7 +36,7 @@ void main() {
     });
 
     test('ends selection correctly', () {
-      final startPosition = Offset(10, 10);
+      const startPosition = Offset(10, 10);
       controller.startSelection(startPosition);
       controller.endSelection();
 

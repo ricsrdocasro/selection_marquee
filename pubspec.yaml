@@ -1,6 +1,6 @@
 name: selection_marquee
-description: A customizable drag-to-select marquee package for Flutter.
-version: 1.0.0
+description: A highly customizable Flutter package for drag-to-select functionality with auto-scrolling and desktop-style features.
+version: 0.1.0
 repository: https://github.com/ricsrdocasro/selection_marquee
 
 environment:

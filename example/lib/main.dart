@@ -38,6 +38,7 @@ class _ExampleHomeState extends State<ExampleHome> {
   double _autoScrollSpeed = 600.0;
   double _minAutoScrollFactor = 0.25;
   bool _edgeAutoScrollEnabled = true;
+  bool _shortcutsEnabled = true;
   AutoScrollMode _autoScrollMode = AutoScrollMode.jump;
   Curve _autoScrollCurve = Curves.linear;
 
@@ -65,6 +66,12 @@ class _ExampleHomeState extends State<ExampleHome> {
   final List<String> items = List.generate(50, (i) => 'Item ${i + 1}');
 
   @override
+  void initState() {
+    super.initState();
+    _controller.allItemsGetter = () => items;
+  }
+
+  @override
   void dispose() {
     _controller.dispose();
     _scrollController.dispose();
@@ -77,6 +84,29 @@ class _ExampleHomeState extends State<ExampleHome> {
       controller: _controller,
       marqueeKey: _marqueeKey,
       borderRadius: BorderRadius.circular(12),
+      onLongPress: () => _controller.toggle(id),
+      onContextMenu: (position) {
+        showMenu(
+          context: context,
+          position: RelativeRect.fromLTRB(
+            position.dx,
+            position.dy,
+            position.dx,
+            position.dy,
+          ),
+          items: [
+            PopupMenuItem(
+              value: 'info',
+              child: Text('Selected: ${_controller.selectedIds.length} items'),
+            ),
+            const PopupMenuItem(value: 'clear', child: Text('Clear Selection')),
+          ],
+        ).then((value) {
+          if (value == 'clear') {
+            _controller.clear();
+          }
+        });
+      },
       selectedBuilder: (context, child, selected) {
         return AnimatedContainer(
           duration: const Duration(milliseconds: 180),
@@ -101,14 +131,10 @@ class _ExampleHomeState extends State<ExampleHome> {
         border: Border.all(color: Colors.blueAccent, width: 2),
         borderRadius: BorderRadius.circular(12),
       ),
-      child: GestureDetector(
-        onLongPress: () => _controller.toggle(id),
-        onTap: () {},
-        child: Card(
-          child: Padding(
-            padding: const EdgeInsets.all(16.0),
-            child: Center(child: Text(id)),
-          ),
+      child: Card(
+        child: Padding(
+          padding: const EdgeInsets.all(16.0),
+          child: Center(child: Text(id)),
         ),
       ),
     );
@@ -148,9 +174,8 @@ class _ExampleHomeState extends State<ExampleHome> {
             child: Listener(
               onPointerMove: (event) {
                 // compute a local estimated velocity for the sidebar display only
-                final rb =
-                    _marqueeKey.currentContext?.findRenderObject()
-                        as RenderBox?;
+                final rb = _marqueeKey.currentContext?.findRenderObject()
+                    as RenderBox?;
                 if (rb == null) return;
                 final local = rb.globalToLocal(event.position);
                 final s = rb.size;
@@ -158,17 +183,15 @@ class _ExampleHomeState extends State<ExampleHome> {
                 double velocity = 0.0;
                 if (local.dy <= zone) {
                   final proximity = (zone - local.dy) / zone;
-                  final factor =
-                      (_minAutoScrollFactor +
-                              (1 - _minAutoScrollFactor) * proximity)
-                          .clamp(0.0, 1.0);
+                  final factor = (_minAutoScrollFactor +
+                          (1 - _minAutoScrollFactor) * proximity)
+                      .clamp(0.0, 1.0);
                   velocity = -_autoScrollSpeed * factor; // negative => up
                 } else if (local.dy >= s.height - zone) {
                   final proximity = (local.dy - (s.height - zone)) / zone;
-                  final factor =
-                      (_minAutoScrollFactor +
-                              (1 - _minAutoScrollFactor) * proximity)
-                          .clamp(0.0, 1.0);
+                  final factor = (_minAutoScrollFactor +
+                          (1 - _minAutoScrollFactor) * proximity)
+                      .clamp(0.0, 1.0);
                   velocity = _autoScrollSpeed * factor; // positive => down
                 }
                 setState(() => _currentVelocity = velocity);
@@ -178,6 +201,7 @@ class _ExampleHomeState extends State<ExampleHome> {
                 controller: _controller,
                 marqueeKey: _marqueeKey,
                 scrollController: _scrollController,
+                enableShortcuts: _shortcutsEnabled,
                 config: SelectionConfig(
                   edgeAutoScroll: _edgeAutoScrollEnabled,
                   autoScrollSpeed: _autoScrollSpeed,
@@ -227,6 +251,19 @@ class _ExampleHomeState extends State<ExampleHome> {
                                       value: _edgeAutoScrollEnabled,
                                       onChanged: (v) => setState(
                                         () => _edgeAutoScrollEnabled = v,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                                Row(
+                                  children: [
+                                    const Text(
+                                        'Keyboard Shortcuts (Ctrl+A, Esc)'),
+                                    const Spacer(),
+                                    Switch(
+                                      value: _shortcutsEnabled,
+                                      onChanged: (v) => setState(
+                                        () => _shortcutsEnabled = v,
                                       ),
                                     ),
                                   ],
@@ -327,21 +364,20 @@ class _ExampleHomeState extends State<ExampleHome> {
                                     Expanded(
                                       child:
                                           DropdownButton<SelectionBorderStyle>(
-                                            value: _selectionBorderStyle,
-                                            items: SelectionBorderStyle.values
-                                                .map(
-                                                  (s) => DropdownMenuItem(
-                                                    value: s,
-                                                    child: Text(s.name),
-                                                  ),
-                                                )
-                                                .toList(),
-                                            onChanged: (v) => setState(
-                                              () => _selectionBorderStyle =
-                                                  v ??
-                                                  SelectionBorderStyle.solid,
-                                            ),
-                                          ),
+                                        value: _selectionBorderStyle,
+                                        items: SelectionBorderStyle.values
+                                            .map(
+                                              (s) => DropdownMenuItem(
+                                                value: s,
+                                                child: Text(s.name),
+                                              ),
+                                            )
+                                            .toList(),
+                                        onChanged: (v) => setState(
+                                          () => _selectionBorderStyle =
+                                              v ?? SelectionBorderStyle.solid,
+                                        ),
+                                      ),
                                     ),
                                   ],
                                 ),
@@ -412,9 +448,8 @@ class _ExampleHomeState extends State<ExampleHome> {
                                 crossAxisCount: 4,
                                 mainAxisSpacing: 8,
                                 crossAxisSpacing: 8,
-                                children: items
-                                    .map((e) => _buildCard(e))
-                                    .toList(),
+                                children:
+                                    items.map((e) => _buildCard(e)).toList(),
                               ),
                             )
                           : SliverList(
@@ -467,20 +502,15 @@ class _ExampleHomeState extends State<ExampleHome> {
                           ),
                           const SizedBox(height: 8),
                           LinearProgressIndicator(
-                            value:
-                                (_currentVelocity.abs() /
-                                        (_autoScrollSpeed == 0
-                                            ? 1
-                                            : _autoScrollSpeed))
-                                    .clamp(0.0, 1.0),
+                            value: (_currentVelocity.abs() /
+                                    (_autoScrollSpeed == 0
+                                        ? 1
+                                        : _autoScrollSpeed))
+                                .clamp(0.0, 1.0),
                           ),
                           const SizedBox(height: 12),
                           Text(
-                            'Direction: ${_currentVelocity < 0
-                                ? 'Up'
-                                : _currentVelocity > 0
-                                ? 'Down'
-                                : 'None'}',
+                            'Direction: ${_currentVelocity < 0 ? 'Up' : _currentVelocity > 0 ? 'Down' : 'None'}',
                           ),
                           const SizedBox(height: 12),
                           Text(

@@ -48,8 +48,7 @@ void main() {
     await tester.pumpAndSettle();
 
     final box = tester.getSize(find.byKey(marqueeBoxKey));
-    final start =
-        tester.getTopLeft(find.byKey(marqueeBoxKey)) +
+    final start = tester.getTopLeft(find.byKey(marqueeBoxKey)) +
         Offset(box.width / 2, box.height / 2);
 
     final gesture = await tester.startGesture(
@@ -64,8 +63,7 @@ void main() {
     await tester.pump();
 
     // move into bottom edge zone
-    final bottomPoint =
-        tester.getTopLeft(find.byKey(marqueeBoxKey)) +
+    final bottomPoint = tester.getTopLeft(find.byKey(marqueeBoxKey)) +
         Offset(box.width / 2, box.height - 5);
     await gesture.moveTo(bottomPoint);
 
@@ -122,8 +120,7 @@ void main() {
     await tester.pumpAndSettle();
 
     final box = tester.getSize(find.byKey(marqueeBoxKey));
-    final start =
-        tester.getTopLeft(find.byKey(marqueeBoxKey)) +
+    final start = tester.getTopLeft(find.byKey(marqueeBoxKey)) +
         Offset(box.width / 2, box.height / 2);
 
     final gesture = await tester.startGesture(
@@ -138,8 +135,7 @@ void main() {
     await tester.pump();
 
     // move into bottom edge zone
-    final bottomPoint =
-        tester.getTopLeft(find.byKey(marqueeBoxKey)) +
+    final bottomPoint = tester.getTopLeft(find.byKey(marqueeBoxKey)) +
         Offset(box.width / 2, box.height - 5);
     await gesture.moveTo(bottomPoint);
 

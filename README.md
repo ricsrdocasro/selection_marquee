@@ -13,6 +13,11 @@ Check out the live example app here: [https://ricsrdocasro.github.io/selection_m
 ## Features
 
 - **Drag-to-Select**: Intuitive mouse and touch support (click & drag or long-press & drag).
+- **Desktop-Class Interaction**:
+  - **Modifiers**: `Ctrl`/`Cmd` + Drag to invert selection, `Shift` + Drag to add.
+  - **Clicking**: Simple click to select, `Ctrl`+Click to toggle, `Shift`+Click for range selection.
+  - **Keyboard Shortcuts**: `Ctrl+A` (Select All) and `Esc` (Clear Selection).
+  - **Right-Click**: Smart context menu handling (selects unselected items before showing menu).
 - **Auto-Scroll**: Automatically scrolls the view when dragging near the edges.
   - Supports both `jump` and `animate` modes.
   - Customizable speed, edge zone size, and acceleration curves.
@@ -32,7 +37,7 @@ Add `selection_marquee` to your `pubspec.yaml`:
 
 ```yaml
 dependencies:
-  selection_marquee: ^0.0.1
+  selection_marquee: ^0.1.0
 ```
 
 Or run:
@@ -61,6 +66,7 @@ SelectionMarquee(
   controller: _controller,
   marqueeKey: _marqueeKey,
   scrollController: _scrollController, // Important for auto-scroll!
+  enableShortcuts: true, // Enable Ctrl+A / Esc
   child: GridView.builder(
     controller: _scrollController,
     // ...
@@ -70,13 +76,18 @@ SelectionMarquee(
 
 ### 3. Make Items Selectable
 
-Wrap each item in your list with `SelectableItem`. This widget registers itself with the controller and handles hit testing.
+Wrap each item in your list with `SelectableItem`. This widget registers itself with the controller and handles hit testing and interactions.
 
 ```dart
 SelectableItem(
   id: 'item_1', // Unique ID for the item
   controller: _controller,
   marqueeKey: _marqueeKey,
+  onContextMenu: (position) {
+    // Handle right-click context menu
+    // The item is automatically selected if it wasn't already.
+    showMenu(context: context, position: position, items: [...]);
+  },
   selectedBuilder: (context, child, isSelected) {
     return Container(
       color: isSelected ? Colors.blue.withOpacity(0.5) : Colors.white,
@@ -87,7 +98,19 @@ SelectableItem(
 )
 ```
 
-### 4. Listen for Changes
+### 4. Support "Select All" in Virtual Lists
+
+If you are using a virtualized list (like `ListView.builder` with many items), you must provide the `allItemsGetter` to the controller so `Ctrl+A` knows about items that aren't currently rendered.
+
+```dart
+@override
+void initState() {
+  super.initState();
+  _controller.allItemsGetter = () => myCompleteListOfIds;
+}
+```
+
+### 5. Listen for Changes
 
 You can listen to selection changes via the controller:
 

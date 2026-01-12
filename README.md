@@ -18,6 +18,10 @@ Check out the live example app here: [https://ricsrdocasro.github.io/selection_m
   - **Clicking**: Simple click to select, `Ctrl`+Click to toggle, `Shift`+Click for range selection.
   - **Keyboard Shortcuts**: `Ctrl+A` (Select All) and `Esc` (Clear Selection).
   - **Right-Click**: Smart context menu handling (selects unselected items before showing menu).
+  - **Scroll Management**: `dragScrollBehavior` manages "gesture fighting" by controlling default drag-scrolling.
+    - **auto**: (Default) Disables drag-scroll on Desktop (allowing marquee) and enables it on Mobile.
+    - **disabled**: Always disables drag-scroll.
+    - **enabled**: Always enables drag-scroll (standard Flutter).
 - **Auto-Scroll**: Automatically scrolls the view when dragging near the edges.
   - Supports both `jump` and `animate` modes.
   - Customizable speed, edge zone size, and acceleration curves.
@@ -67,6 +71,7 @@ SelectionMarquee(
   marqueeKey: _marqueeKey,
   scrollController: _scrollController, // Important for auto-scroll!
   enableShortcuts: true, // Enable Ctrl+A / Esc
+  dragScrollBehavior: DragScrollBehavior.auto, // Desktop: disabled, Mobile: enabled
   child: GridView.builder(
     controller: _scrollController,
     // ...

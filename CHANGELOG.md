@@ -5,18 +5,42 @@ All notable changes to this project will be documented in this file.
 The format is based on "Keep a Changelog" and this project adheres to
 Semantic Versioning.
 
-## [0.1.0]
+## [0.2.0]
+
+
 
 **New Features**
+
+* **Drag-to-Scroll Management:** Added `dragScrollBehavior` to `SelectionMarquee`. It provides explicit control (`auto`, `enabled`, `disabled`) over default drag-scrolling to prevent "gesture fighting" with marquee selection.
+
+    *   **Auto (Default):** Disables drag-scroll on Desktop (prioritizing marquee) and enables it on Mobile (prioritizing touch scroll).
+
+
+
+## [0.1.0]
+
+
+
+**New Features**
+
 * **Desktop-Grade Interaction:**
+
     * **Keyboard Modifiers:** `Ctrl` / `Cmd` + Drag to invert selection; `Shift` + Drag to add to selection.
+
     * **Click Interaction:**
+
         * **Click:** Select single item (replaces previous selection).
+
         * **Ctrl + Click:** Toggle item selection.
+
         * **Shift + Click:** Range selection (selects all items between the last anchor and current item).
+
     * **Context Menu (Right-Click):** Added `onContextMenu` callback to `SelectableItem`. Smartly handles auto-selection (selects unselected items on right-click) before showing the menu.
-* **Keyboard Shortcuts:** Built-in `Ctrl+A` (Select All) and `Esc` (Clear Selection).
+
+    *   **Keyboard Shortcuts:** Built-in `Ctrl+A` (Select All) and `Esc` (Clear Selection).
+
 * **Virtualization Support:** Added `allItemsGetter` to `SelectionController` to support 'Select All' in virtualized lists (like `ListView.builder`) where not all items are currently rendered.
+
 * **New Parameters:** `enableKeyboardDrag` and `enableShortcuts` in `SelectionMarquee`.
 
 **Bug Fixes**

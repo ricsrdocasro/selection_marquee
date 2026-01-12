@@ -436,6 +436,20 @@ class SelectionController extends ChangeNotifier {
   }
 }
 
+/// Defines the behavior of drag-to-scroll interactions.
+enum DragScrollBehavior {
+  /// Automatically decides based on platform:
+  /// * **Desktop (Windows, Linux, macOS):** Disabled (Marquee drag takes priority).
+  /// * **Mobile (Android, iOS):** Enabled (Standard touch scrolling takes priority).
+  auto,
+
+  /// Disables drag-to-scroll. Marquee selection takes priority.
+  disabled,
+
+  /// Enables drag-to-scroll. Standard Flutter behavior.
+  enabled,
+}
+
 /// A widget that provides drag-to-select functionality (marquee selection) for its child.
 class SelectionMarquee extends StatefulWidget {
   /// The child widget (usually a scrollable view like ListView or GridView).
@@ -469,6 +483,11 @@ class SelectionMarquee extends StatefulWidget {
   /// * Default is true.
   final bool enableShortcuts;
 
+  /// Controls the drag-to-scroll behavior of the child scrollable.
+  ///
+  /// Default is [DragScrollBehavior.auto].
+  final DragScrollBehavior dragScrollBehavior;
+
   /// Creates a [SelectionMarquee].
   const SelectionMarquee({
     super.key,
@@ -479,6 +498,7 @@ class SelectionMarquee extends StatefulWidget {
     this.scrollController,
     this.enableKeyboardDrag = true,
     this.enableShortcuts = true,
+    this.dragScrollBehavior = DragScrollBehavior.auto,
   });
 
   @override
@@ -533,6 +553,20 @@ class _SelectionMarqueeState extends State<SelectionMarquee>
     return Rect.fromPoints(adjustedStart, _currentPointerLocal!);
   }
 
+  bool get _effectiveDisableDragScrolling {
+    switch (widget.dragScrollBehavior) {
+      case DragScrollBehavior.disabled:
+        return true;
+      case DragScrollBehavior.enabled:
+        return false;
+      case DragScrollBehavior.auto:
+        final platform = Theme.of(context).platform;
+        return platform == TargetPlatform.windows ||
+            platform == TargetPlatform.linux ||
+            platform == TargetPlatform.macOS;
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final selDec = widget.config.selectionDecoration;
@@ -547,6 +581,18 @@ class _SelectionMarqueeState extends State<SelectionMarquee>
         _marchingController?.stop();
       }
       _marchingController?.value = 0.0;
+    }
+
+    Widget scrollableChild = widget.child;
+
+    if (_effectiveDisableDragScrolling) {
+      scrollableChild = ScrollConfiguration(
+        behavior: ScrollConfiguration.of(context).copyWith(
+          // This disables 'drag' but keeps wheel/scrollbar functional
+          dragDevices: {},
+        ),
+        child: scrollableChild,
+      );
     }
 
     Widget content = Listener(
@@ -569,102 +615,109 @@ class _SelectionMarqueeState extends State<SelectionMarquee>
       },
       child: GestureDetector(
         behavior: HitTestBehavior.translucent,
-        onPanStart: (details) {
-          _startPos = details.localPosition;
-          _currentPointerLocal = details.localPosition;
-          _dragStarted = false;
+        onPanStart: !_effectiveDisableDragScrolling
+            ? null
+            : (details) {
+                _startPos = details.localPosition;
+                _currentPointerLocal = details.localPosition;
+                _dragStarted = false;
 
-          // SCROLL FIX: Capture Scroll Offset
-          if (widget.scrollController?.hasClients ?? false) {
-            _dragStartScrollOffset = widget.scrollController!.offset;
-          } else {
-            _dragStartScrollOffset = 0.0;
-          }
+                // SCROLL FIX: Capture Scroll Offset
+                if (widget.scrollController?.hasClients ?? false) {
+                  _dragStartScrollOffset = widget.scrollController!.offset;
+                } else {
+                  _dragStartScrollOffset = 0.0;
+                }
 
-          // KEYBOARD MODIFIERS
-          bool shouldClear = true;
+                // KEYBOARD MODIFIERS
+                bool shouldClear = true;
 
-          if (widget.enableKeyboardDrag) {
-            final keys = HardwareKeyboard.instance.logicalKeysPressed;
-            final isCtrl = keys.contains(LogicalKeyboardKey.controlLeft) ||
-                keys.contains(LogicalKeyboardKey.controlRight) ||
-                keys.contains(LogicalKeyboardKey.metaLeft) ||
-                keys.contains(LogicalKeyboardKey.metaRight);
+                if (widget.enableKeyboardDrag) {
+                  final keys = HardwareKeyboard.instance.logicalKeysPressed;
+                  final isCtrl = keys.contains(LogicalKeyboardKey.controlLeft) ||
+                      keys.contains(LogicalKeyboardKey.controlRight) ||
+                      keys.contains(LogicalKeyboardKey.metaLeft) ||
+                      keys.contains(LogicalKeyboardKey.metaRight);
 
-            final isShift = keys.contains(LogicalKeyboardKey.shiftLeft) ||
-                keys.contains(LogicalKeyboardKey.shiftRight);
+                  final isShift = keys.contains(LogicalKeyboardKey.shiftLeft) ||
+                      keys.contains(LogicalKeyboardKey.shiftRight);
 
-            // Logic:
-            // Ctrl + Drag = Invert (Toggle) what is under the marquee
-            // Shift + Drag = Additive (Accumulate) - standard desktop behavior for marquee
+                  // Logic:
+                  // Ctrl + Drag = Invert (Toggle) what is under the marquee
+                  // Shift + Drag = Additive (Accumulate) - standard desktop behavior for marquee
 
-            if (isCtrl || isShift) {
-              shouldClear = false;
-            }
-          }
+                  if (isCtrl || isShift) {
+                    shouldClear = false;
+                  }
+                }
 
-          if (shouldClear) {
-            widget.controller.clear();
-          }
-        },
-        onPanUpdate: (details) {
-          if (_startPos == null) return;
-          _currentPointerLocal = details.localPosition;
-          final distance = (details.localPosition - _startPos!).distance;
-          final allowTouch = widget.config.allowTouch || _isMouse;
-          if (!_dragStarted &&
-              distance >= widget.config.minDragDistance &&
-              allowTouch) {
-            _dragStarted = true;
+                if (shouldClear) {
+                  widget.controller.clear();
+                }
+              },
+        onPanUpdate: !_effectiveDisableDragScrolling
+            ? null
+            : (details) {
+                if (_startPos == null) return;
+                _currentPointerLocal = details.localPosition;
+                final distance =
+                    (details.localPosition - _startPos!).distance;
+                final allowTouch = widget.config.allowTouch || _isMouse;
+                if (!_dragStarted &&
+                    distance >= widget.config.minDragDistance &&
+                    allowTouch) {
+                  _dragStarted = true;
 
-            // RE-CALCULATE initial selection here because the clear() might have happened above
-            Set<String>? finalInitial;
-            SelectionDragType finalType = SelectionDragType.replace;
+                  // RE-CALCULATE initial selection here because the clear() might have happened above
+                  Set<String>? finalInitial;
+                  SelectionDragType finalType = SelectionDragType.replace;
 
-            if (widget.enableKeyboardDrag) {
-              final keys = HardwareKeyboard.instance.logicalKeysPressed;
-              final isCtrl = keys.contains(LogicalKeyboardKey.controlLeft) ||
-                  keys.contains(LogicalKeyboardKey.controlRight) ||
-                  keys.contains(LogicalKeyboardKey.metaLeft) ||
-                  keys.contains(LogicalKeyboardKey.metaRight);
-              final isShift = keys.contains(LogicalKeyboardKey.shiftLeft) ||
-                  keys.contains(LogicalKeyboardKey.shiftRight);
+                  if (widget.enableKeyboardDrag) {
+                    final keys = HardwareKeyboard.instance.logicalKeysPressed;
+                    final isCtrl = keys.contains(LogicalKeyboardKey.controlLeft) ||
+                        keys.contains(LogicalKeyboardKey.controlRight) ||
+                        keys.contains(LogicalKeyboardKey.metaLeft) ||
+                        keys.contains(LogicalKeyboardKey.metaRight);
+                    final isShift = keys.contains(LogicalKeyboardKey.shiftLeft) ||
+                        keys.contains(LogicalKeyboardKey.shiftRight);
 
-              if (isCtrl) {
-                finalInitial = widget.controller.selectedIds;
-                finalType = SelectionDragType.invert;
-              } else if (isShift) {
-                finalInitial = widget.controller.selectedIds;
-                finalType = SelectionDragType.additive;
-              }
-            }
+                    if (isCtrl) {
+                      finalInitial = widget.controller.selectedIds;
+                      finalType = SelectionDragType.invert;
+                    } else if (isShift) {
+                      finalInitial = widget.controller.selectedIds;
+                      finalType = SelectionDragType.additive;
+                    }
+                  }
 
-            widget.controller.startSelection(_startPos!,
-                initialSelection: finalInitial, type: finalType);
-          }
+                  widget.controller.startSelection(_startPos!,
+                      initialSelection: finalInitial, type: finalType);
+                }
 
-          if (_dragStarted) {
-            final rect = _getSelectionRect();
-            widget.controller.updateSelection(
-              rect.bottomRight,
-              rect.topLeft,
-            );
-            _maybeStartAutoScroll(details.localPosition);
-          }
-        },
-        onPanEnd: (details) {
-          if (_dragStarted) {
-            widget.controller.endSelection();
-          }
-          _startPos = null;
-          _currentPointerLocal = null;
-          _dragStarted = false;
-          _stopAutoScroll();
-        },
+                if (_dragStarted) {
+                  final rect = _getSelectionRect();
+                  widget.controller.updateSelection(
+                    rect.bottomRight,
+                    rect.topLeft,
+                  );
+                  _maybeStartAutoScroll(details.localPosition);
+                }
+              },
+        onPanEnd: !_effectiveDisableDragScrolling
+            ? null
+            : (details) {
+                if (_dragStarted) {
+                  widget.controller.endSelection();
+                }
+                _startPos = null;
+                _currentPointerLocal = null;
+                _dragStarted = false;
+                _stopAutoScroll();
+              },
         child: Stack(
           key: widget.marqueeKey,
           children: [
-            widget.child,
+            scrollableChild,
             ListenableBuilder(
               listenable: widget.controller,
               builder: (context, _) {

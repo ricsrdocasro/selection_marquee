@@ -23,6 +23,7 @@ void main() {
               controller: controller,
               marqueeKey: marqueeKey,
               scrollController: scrollController,
+              dragScrollBehavior: DragScrollBehavior.disabled, // Force marquee active
               config: const SelectionConfig(
                 edgeAutoScroll: true,
                 autoScrollMode: AutoScrollMode.jump,
@@ -94,6 +95,7 @@ void main() {
               controller: controller,
               marqueeKey: marqueeKey,
               scrollController: scrollController,
+              dragScrollBehavior: DragScrollBehavior.disabled, // Force marquee active
               config: const SelectionConfig(
                 edgeAutoScroll: true,
                 autoScrollMode: AutoScrollMode.animate,

@@ -1,8 +1,18 @@
+import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:selection_marquee/selection_marquee.dart';
 
 void main() {
   runApp(const ExampleApp());
+}
+
+class _AppScrollBehavior extends MaterialScrollBehavior {
+  @override
+  Set<PointerDeviceKind> get dragDevices => {
+        PointerDeviceKind.touch,
+        PointerDeviceKind.mouse,
+        PointerDeviceKind.trackpad,
+      };
 }
 
 class ExampleApp extends StatelessWidget {
@@ -12,6 +22,7 @@ class ExampleApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       title: 'Selection Marquee Example',
+      scrollBehavior: _AppScrollBehavior(),
       theme: ThemeData(useMaterial3: true),
       home: const ExampleHome(),
     );
@@ -39,6 +50,7 @@ class _ExampleHomeState extends State<ExampleHome> {
   double _minAutoScrollFactor = 0.25;
   bool _edgeAutoScrollEnabled = true;
   bool _shortcutsEnabled = true;
+  DragScrollBehavior _dragScrollBehavior = DragScrollBehavior.auto;
   AutoScrollMode _autoScrollMode = AutoScrollMode.jump;
   Curve _autoScrollCurve = Curves.linear;
 
@@ -202,6 +214,7 @@ class _ExampleHomeState extends State<ExampleHome> {
                 marqueeKey: _marqueeKey,
                 scrollController: _scrollController,
                 enableShortcuts: _shortcutsEnabled,
+                dragScrollBehavior: _dragScrollBehavior,
                 config: SelectionConfig(
                   edgeAutoScroll: _edgeAutoScrollEnabled,
                   autoScrollSpeed: _autoScrollSpeed,
@@ -264,6 +277,29 @@ class _ExampleHomeState extends State<ExampleHome> {
                                       value: _shortcutsEnabled,
                                       onChanged: (v) => setState(
                                         () => _shortcutsEnabled = v,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                                const SizedBox(height: 8),
+                                const Text('Drag Scroll Behavior'),
+                                Row(
+                                  children: [
+                                    Expanded(
+                                      child: DropdownButton<DragScrollBehavior>(
+                                        value: _dragScrollBehavior,
+                                        items: DragScrollBehavior.values
+                                            .map(
+                                              (v) => DropdownMenuItem(
+                                                value: v,
+                                                child: Text(v.name),
+                                              ),
+                                            )
+                                            .toList(),
+                                        onChanged: (v) => setState(
+                                          () => _dragScrollBehavior =
+                                              v ?? DragScrollBehavior.auto,
+                                        ),
                                       ),
                                     ),
                                   ],
